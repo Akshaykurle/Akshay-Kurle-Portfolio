@@ -1,0 +1,1196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Akshay Kurle | Senior Game Tester</title>
+  <!-- Updated Fonts: Montserrat for headings, Inter for body -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Global styles for a consistent dark theme inspired by Unreal Engine aesthetics */
+    body {
+      font-family: 'Inter', sans-serif; /* Primary font for body text */
+      background-color: hsl(222, 13%, 12%); /* Reverted to very dark desaturated blue-grey */
+      color: #E2E8F0; /* Light text color for contrast (slate-200) */
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+      min-height: 100vh;
+      box-sizing: border-box;
+      overflow-x: hidden; /* Prevent horizontal scroll */
+      position: relative; /* Needed for absolute positioning of canvas */
+    }
+
+    /* Background Canvas Styling */
+    #backgroundCanvas {
+      position: fixed; /* Fixed position to cover the viewport */
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1; /* Place it behind all content */
+      background-color: hsl(222, 13%, 12%); /* Reverted to base background color for canvas */
+    }
+
+    /* Header styling */
+    header {
+      background: hsla(222, 13%, 18%, 0.8); /* Transparent dark background */
+      padding: 2rem 0; /* Adjusted padding to allow inner content to handle horizontal spacing */
+      text-align: center;
+      border-bottom: 3px solid #00BFFF; /* Vibrant deep sky blue accent */
+      width: 100%;
+      box-shadow: 0 4px 20px rgba(0, 191, 255, 0.3); /* Stronger blue glow effect */
+      position: relative; /* Ensure header is above canvas */
+      z-index: 1; /* Place it above the canvas */
+    }
+    /* New container for header content to align with sections */
+    header .header-content {
+      max-width: 1000px;
+      margin: 0 auto; /* Center the content */
+      padding: 0 1rem; /* Add some horizontal padding inside the centered content */
+      text-align: left; /* Align text to left within its container */
+    }
+    header h1 {
+      font-family: 'Montserrat', sans-serif; /* Modern bold font */
+      color: #00BFFF; /* Vibrant deep sky blue accent */
+      font-size: 2.8rem; /* Slightly larger for impact */
+      margin-bottom: 0.5rem;
+      text-shadow: 0 0 12px rgba(0, 191, 255, 0.8); /* Neon glow for H1 */
+      font-weight: 800; /* Extra bold */
+    }
+    header p {
+      color: #A0AEC0; /* Light grey for description (slate-400) */
+      font-size: 1.1rem;
+    }
+
+    /* Section common styling */
+    .section {
+      padding: 2.5rem; /* Increased padding */
+      max-width: 1000px; /* Ensures consistent width across all main sections */
+      width: 100%; /* Makes sections responsive, taking full width up to max-width */
+      margin: 2rem auto; /* Vertical margin for separation, auto for horizontal centering */
+      background-color: hsla(222, 13%, 18%, 0.8); /* Transparent background */
+      border-radius: 20px; /* More rounded corners */
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6); /* Stronger, diffused shadow */
+      border: 1px solid hsla(222, 13%, 25%, 0.6); /* Darker, more defined transparent border */
+      position: relative; /* Ensure section is above canvas */
+      z-index: 1; /* Place it above the canvas */
+    }
+    .section h2 {
+      font-family: 'Montserrat', sans-serif; /* Modern bold font */
+      color: #9370DB; /* Medium Purple accent for sub-headers */
+      border-bottom: 2px solid #9370DB; /* Purple accent for sub-headers */
+      padding-bottom: 0.75rem;
+      margin-bottom: 1.8rem; /* More space below headings */
+      font-size: 2rem; /* Slightly larger */
+      text-shadow: 0 0 10px rgba(147, 112, 219, 0.7); /* Subtle purple glow for H2 */
+      font-weight: 700; /* Bold */
+    }
+    .section p {
+      color: #CFD8DC; /* Lighter grey for section text (blue-grey-100) */
+      line-height: 1.8; /* Increased line height for readability */
+      margin-bottom: 1.2rem; /* More space between paragraphs */
+    }
+    .section strong {
+      color: #7B68EE; /* Medium Slate Blue for strong text */
+      font-weight: 600; /* Slightly bolder */
+    }
+    .section ul {
+        list-style-type: none; /* Hide default bullets */
+        margin-left: 0; /* Reset default margin */
+        padding-left: 0; /* Remove default padding for custom bullet placement */
+        color: #CFD8DC; /* Consistent text color for list items */
+        line-height: 2; /* More line height for lists */
+    }
+    .section ul li {
+        margin-bottom: 0.6rem; /* More space between list items */
+        position: relative; /* For positioning the pseudo-element */
+        padding-left: 1.8rem; /* Add padding to the list item itself to create space for the bullet + gap */
+    }
+    /* Custom bullets for Skills */
+    .section ul.skills-list li::before {
+        content: '⚡ '; /* Lightning bolt emoji */
+        position: absolute;
+        left: 0; /* Position at the start of the list item's padding */
+        color: #FFD700; /* Gold color */
+    }
+    /* Custom bullets for Tools */
+    .section ul.tools-list li::before {
+        content: '⚙️ '; /* Gear emoji */
+        position: absolute;
+        left: 0; /* Position at the start of the list item's padding */
+        color: #B0C4DE; /* LightSteelBlue color */
+    }
+    /* Custom bullets for Platforms Tested On */
+    .section h2.platforms-header::before {
+        content: '🎮 '; /* Gaming console emoji for the header */
+        color: #00BFFF; /* Deep Sky Blue for the header emoji */
+        margin-right: 0.5rem; /* Space between emoji and header text */
+    }
+    /* Specific bullet styles for each platform */
+    .section ul.platforms-list li.pc-platform::before {
+        content: '💻 '; /* Laptop emoji */
+        color: #E0E0E0; /* Light gray for laptop */
+        position: absolute;
+        left: 0;
+    }
+    .section ul.platforms-list li.playstation-platform::before {
+        content: '🕹️ '; /* Joystick emoji (more generic gaming symbol) */
+        color: #0070D1; /* PlayStation blue */
+        position: absolute;
+        left: 0;
+    }
+    .section ul.platforms-list li.xbox-platform::before {
+        content: '🕹️ '; /* Joystick emoji */
+        color: #107C10; /* Xbox green */
+        position: absolute;
+        left: 0;
+    }
+    .section ul.platforms-list li.switch-platform::before {
+        content: '🕹️ '; /* Joystick emoji */
+        color: #E60012; /* Nintendo Switch red */
+        position: absolute;
+        left: 0;
+    }
+
+
+    /* Project listing container (now with pagination logic) */
+    #projects-pagination-container {
+      max-width: 1000px; /* Ensures consistent width with other sections */
+      width: 100%; /* Makes it responsive, taking full width up to max-width */
+      background-color: hsla(222, 13%, 18%, 0.8); /* Transparent background */
+      border-radius: 20px; /* More rounded */
+      box-shadow: 0 10px 35px rgba(0, 0, 0, 0.6); /* Stronger dark shadow */
+      padding: 2.5rem; /* Increased padding */
+      box-sizing: border-box;
+      color: #E2E8F0; /* Light text for consistency */
+      margin: 2rem auto; /* Ensures horizontal centering and consistent vertical margin */
+      border: 1px solid hsla(222, 13%, 25%, 0.6); /* Darker, more defined transparent border */
+      position: relative; /* Ensure container is above canvas */
+      z-index: 1; /* Place it above the canvas */
+    }
+    #projects-pagination-container h1 {
+      font-family: 'Montserrat', sans-serif; /* Modern bold font */
+      color: #00BFFF; /* Consistent vibrant deep sky blue accent */
+      font-size: 2.5rem;
+      font-weight: 800;
+      margin-bottom: 2.5rem; /* More space below heading */
+      text-align: center;
+      text-shadow: 0 0 12px rgba(0, 191, 255, 0.8); /* Neon glow for H1 */
+    }
+
+    /* Project card specific styles */
+    .project-card {
+      display: none;
+      animation: fadeIn 0.6s ease-out forwards;
+      background-color: hsla(222, 13%, 22%, 0.8); /* Transparent card background */
+      border: 1px solid hsla(222, 13%, 30%, 0.6); /* Transparent border */
+      color: #E2E8F0; /* Light text inside cards */
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.55); /* Stronger shadow for pop */
+      border-radius: 1.5rem;
+      padding: 1.8rem; /* Increased padding */
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      min-height: 620px; /* Slightly increased min-height for content balance */
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+    }
+    .project-card:hover {
+        transform: translateY(-10px); /* More pronounced lift on hover */
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.65); /* Stronger shadow on hover */
+    }
+    .project-card img {
+      width: 100%;
+      height: auto;
+      object-fit: cover;
+      border-radius: 1rem; /* More rounded image corners */
+      margin-bottom: 1.2rem;
+      border: 2px solid hsla(222, 13%, 35%, 0.7); /* Transparent border around images */
+    }
+    .project-card h3 {
+      font-family: 'Montserrat', sans-serif; /* Modern bold font */
+      color: #00BFFF; /* Vibrant deep sky blue for card titles */
+      font-size: 1.85rem; /* Slightly larger */
+      font-weight: 700;
+      margin-bottom: 0.8rem;
+    }
+    .project-card p {
+        color: #B0C4DE; /* Light Steel Blue for card text */
+        line-height: 1.7;
+        margin-bottom: 1rem;
+    }
+    /* Style for the description paragraph to enable scrolling for long text */
+    .project-card p.project-description { /* Added class for specific targeting */
+        max-height: 140px; /* Slightly increased height for description */
+        overflow-y: auto; /* Add scrollbar if content overflows */
+        margin-bottom: 1.2rem; /* Ensure spacing below description */
+        /* Scrollbar styling for Webkit browsers */
+        &::-webkit-scrollbar {
+            width: 8px; /* Width of the scrollbar */
+        }
+        &::-webkit-scrollbar-track {
+            background: hsla(222, 13%, 15%, 0.5); /* Darker transparent track */
+            border-radius: 10px;
+        }
+        &::-webkit-scrollbar-thumb {
+            background-color: hsla(222, 13%, 40%, 0.7); /* Medium grey transparent thumb */
+            border-radius: 10px;
+            border: 2px solid hsla(222, 13%, 15%, 0.5); /* Padding around the thumb */
+        }
+        &::-webkit-scrollbar-thumb:hover {
+            background-color: hsla(222, 13%, 50%, 0.8); /* Lighter grey transparent on hover */
+        }
+    }
+    .project-card strong {
+      color: #7B68EE; /* Medium Slate Blue for strong text in cards */
+    }
+    .project-card .genre {
+        font-style: italic;
+        color: #94A3B8; /* Slate-400 for genre */
+        font-size: 1rem; /* Slightly larger genre text */
+        margin-top: 0.6rem;
+    }
+
+    /* Animation for cards appearing */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(40px); } /* Start lower */
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Pagination controls container */
+    .pagination-controls {
+      display: flex;
+      justify-content: center;
+      align-items: center; /* Vertically align items */
+      margin-top: 3rem; /* More space below cards */
+      gap: 1.5rem; /* Increased space between buttons and number */
+    }
+
+    /* Page number display */
+    #page-number-display {
+        color: #E2E8F0; /* Light text color */
+        font-size: 1.2rem; /* Slightly larger font */
+        margin: 0 1.5rem; /* More space around the page number */
+        font-weight: 700;
+        min-width: 100px; /* Ensure enough space for "X of Y" */
+        text-align: center;
+        background-color: hsla(222, 13%, 22%, 0.8); /* Match card transparent background */
+        padding: 0.5rem 1rem;
+        border-radius: 10px;
+        border: 1px solid hsla(222, 13%, 30%, 0.6);
+    }
+
+    /* Pagination button styles */
+    .pagination-controls button {
+      background-color: #00BFFF; /* Primary button color (Deep Sky Blue) */
+      color: #0F172A; /* Dark text for contrast */
+      padding: 0.8rem 2.5rem; /* Larger buttons */
+      border-radius: 9999px; /* Pill shape */
+      font-size: 1.15rem; /* Slightly larger font */
+      font-weight: 700;
+      box-shadow: 0 6px 20px rgba(0, 191, 255, 0.4); /* Enhanced blue glow */
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      border: none;
+      cursor: pointer;
+    }
+
+    .pagination-controls button:hover {
+      background-color: #00A3CC; /* Darker blue on hover */
+      transform: translateY(-6px); /* More pronounced lift */
+      box-shadow: 0 12px 30px rgba(0, 191, 255, 0.6);
+    }
+
+    .pagination-controls button:disabled {
+      background-color: hsla(222, 13%, 30%, 0.6); /* Darker gray transparent for disabled */
+      color: #94A3B8; /* Slate-400 text for disabled */
+      cursor: not-allowed;
+      box-shadow: none;
+      transform: none;
+    }
+
+    /* Styles for previous button specifically */
+    .pagination-controls #prevBtn {
+        background-color: #9370DB; /* Medium Purple accent for previous button */
+        color: #0F172A;
+        box-shadow: 0 6px 20px rgba(147, 112, 219, 0.4); /* Purple glow */
+    }
+    .pagination-controls #prevBtn:hover {
+        background-color: #7A5ABC; /* Darker purple on hover */
+        box-shadow: 0 12px 30px rgba(147, 112, 219, 0.6);
+    }
+
+    /* Handheld Console Sidebar (Index) Styles */
+    #handheld-console-sidebar {
+      position: fixed;
+      right: 20px; /* Position from the right */
+      top: 50%; /* Center vertically */
+      transform: translateY(-50%) translateX(300px); /* Start off-screen to the right */
+      width: 280px; /* Increased width of the console */
+      height: 600px; /* Adjusted height for content and D-pad */
+      background-color: hsla(222, 13%, 18%, 0.5); /* Semi-transparent dark grey for console body */
+      border-radius: 25px; /* Rounded console corners */
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4); /* Reduced shadow for transparent effect */
+      border: 2px solid hsla(222, 13%, 25%, 0.6); /* Transparent border for console outline */
+      z-index: 20; /* Ensure it's above main content */
+      display: flex; /* Always flex */
+      flex-direction: column;
+      align-items: center;
+      padding: 20px; /* Internal padding */
+      box-sizing: border-box; /* Include padding in width/height */
+      justify-content: space-between; /* Distribute items vertically */
+      transition: transform 1s ease-out; /* Smooth transition for slide-in */
+    }
+
+    /* Class to apply after initial load to slide in the sidebar */
+    #handheld-console-sidebar.slide-in {
+      transform: translateY(-50%) translateX(0); /* Slide into view */
+    }
+
+
+    #handheld-console-sidebar .console-screen {
+        width: 240px; /* Increased screen width */
+        height: 400px; /* Adjusted screen height to fit all menu items */
+        background-color: hsla(222, 13%, 15%, 0.7); /* Slightly darker, more transparent screen background */
+        border-radius: 10px; /* Rounded screen corners */
+        border: 2px solid hsla(0, 0%, 100%, 0.2); /* Faint white border for screen glow effect */
+        box-shadow: inset 0 0 10px rgba(0, 191, 255, 0.2); /* More subtle inner screen glow */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        overflow-y: hidden; /* Removed scrollbar */
+        padding: 10px;
+        box-sizing: border-box;
+    }
+
+    #handheld-console-sidebar ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        width: 100%;
+    }
+
+    #handheld-console-sidebar ul li {
+        margin-bottom: 8px; /* Increased spacing between menu items */
+    }
+
+    #handheld-console-sidebar ul li a {
+        display: block;
+        padding: 10px 12px; /* Increased padding for better touch targets */
+        color: #E2E8F0; /* Light text for menu items */
+        text-align: center;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 1.1rem; /* Slightly larger font for menu items */
+        border-radius: 8px; /* Slightly more rounded buttons */
+        transition: background-color 0.2s ease, color 0.2s ease, transform 0.1s ease;
+    }
+
+    #handheld-console-sidebar ul li a:hover,
+    #handheld-console-sidebar ul li a.active { /* Added active state */
+        background-color: hsla(0, 0%, 100%, 0.15); /* Subtle white transparency on hover */
+        color: #00BFFF; /* Blue text on highlight */
+        transform: scale(1.05); /* Slight pop effect */
+        box-shadow: 0 0 10px rgba(0, 191, 255, 0.4); /* Muted blue glow */
+    }
+
+    /* D-pad styles */
+    .dpad-container {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        grid-template-rows: repeat(3, 1fr);
+        width: 80px; /* Overall size of the D-pad - Made larger */
+        height: 80px; /* Overall size of the D-pad - Made larger */
+        margin-top: 15px; /* Adjust spacing */
+        position: absolute; /* Absolute positioning within sidebar */
+        left: 50%; /* Center horizontally */
+        transform: translateX(-50%); /* Adjust for true centering */
+        bottom: 50px; /* Position towards the bottom */
+    }
+
+    .dpad-center {
+        grid-area: 2 / 2 / 3 / 3; /* Center cell */
+        background-color: hsla(222, 13%, 15%, 0.7); /* Transparent dark center */
+        border: 1px solid hsla(222, 13%, 25%, 0.6);
+        border-radius: 5px;
+    }
+
+    .dpad-button {
+        background-color: hsla(222, 13%, 22%, 0.6); /* Transparent darker button color */
+        border: 1px solid hsla(222, 13%, 30%, 0.6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #E2E8F0;
+        font-size: 0.8rem;
+        cursor: pointer;
+        transition: background-color 0.1s ease, transform 0.1s ease;
+        position: relative; /* For the psuedo-elements */
+    }
+
+    .dpad-button:hover {
+        background-color: hsla(222, 13%, 28%, 0.7); /* Lighter transparent on hover */
+        transform: scale(1.05);
+    }
+
+    .dpad-up { grid-area: 1 / 2 / 2 / 3; border-bottom: none; border-radius: 5px 5px 0 0;}
+    .dpad-left { grid-area: 2 / 1 / 3 / 2; border-right: none; border-radius: 5px 0 0 5px;}
+    .dpad-right { grid-area: 2 / 3 / 3 / 4; border-left: none; border-radius: 0 5px 5px 0;}
+    .dpad-down { grid-area: 3 / 2 / 4 / 3; border-top: none; border-radius: 0 0 5px 5px;}
+
+
+    /* Responsive adjustments */
+    @media (max-width: 1023px) { /* Hide sidebar on screens smaller than lg breakpoint */
+      #handheld-console-sidebar {
+        display: none;
+      }
+      #portfolio-content-wrapper {
+        margin-right: auto; /* Ensure content takes full width */
+        padding-right: 1rem; /* Consistent padding */
+      }
+      header .header-content {
+        text-align: center; /* Center header text on smaller screens */
+      }
+      header h1 {
+        font-size: 2.2rem;
+      }
+      .section h2 {
+        font-size: 1.7rem;
+      }
+      #projects-pagination-container h1 {
+        font-size: 2.2rem;
+      }
+      .project-card h3 {
+        font-size: 1.6rem;
+      }
+      .pagination-controls button {
+        font-size: 1rem;
+        padding: 0.7rem 1.8rem;
+      }
+    }
+    /* Adjust main content width when sidebar is visible on large screens */
+    @media (min-width: 1024px) { /* Tailwind's lg breakpoint */
+        #portfolio-content-wrapper {
+            margin-right: 310px; /* Increased space for the handheld console */
+        }
+    }
+  </style>
+</head>
+<body>
+  <!-- Background Canvas -->
+  <canvas id="backgroundCanvas"></canvas>
+
+  <!-- Main Portfolio Content Wrapper with Responsive Margin for Sidebar -->
+  <div class="flex w-full">
+    <div id="portfolio-content-wrapper" class="flex-grow mx-auto px-4">
+      <header id="top-section">
+        <div class="header-content">
+          <h1>🎮 Akshay Kurle – Senior Game Tester</h1>
+          <p>"Welcome, Player One! Ready to debug destiny and conquer glitches? I'm Akshay, and this is where QA meets high score."</p>
+        </div>
+      </header>
+
+      <div class="section">
+        <h2 id="about-me">🧠 About Me</h2>
+        <p>As a passionate QA professional, I blend sharp attention to detail, creative problem-solving, and a deep love for gaming to ensure every level, mechanic, and feature delivers an unforgettable player experience. With over five years of experience in executing tests, reporting bugs, leading QA teams, and managing end-to-end game testing projects, I bring the technical skills and leadership your team can count on.</p>
+      </div>
+
+      <div class="section">
+        <h2 id="experience">💼 Experience</h2>
+        <p><strong>Electronic Arts – Senior QA Tester (Jun 2024 – Present)</strong><br>
+        As a Senior Game Tester, I took full ownership of test coverage and quality assurance for assigned game features. I designed and executed comprehensive manual test cases and performed exploratory testing to uncover edge-case issues. I planned and allocated tasks to Points of Contact (POCs) across features, ensuring key testing milestones were met. I oversaw test execution across multiple platforms, maintained proper hour tracking, and collaborated closely with developers and quality designers to triage and resolve bugs efficiently.</p>
+        <p><strong>GlobalStep – Senior Test Engineer / Test Engineer (2019 – 2024)</strong><br>
+        I began my QA journey as a Test Engineer, focusing on playthroughs, ad-hoc testing, defect reporting, regression testing, and WIP build evaluations. I actively contributed to documentation and training material development and consistently provided clear task and EOD reports.<br><br>
+        As I progressed, I led functionality and compliance testing—especially for SONY consoles—ensuring products met submission requirements. I created detailed test cases, led functional test planning, and mentored new testers. My responsibilities expanded to team management, task delegation, and ensuring timely project deliveries. I also evaluated gameplay quality, including online aspects like latency and downloads, to support a smooth player experience. My role was highly collaborative, involving coordination with cross-functional teams including developers, producers, and certification leads to align quality goals and meet milestones effectively.</p>
+      </div>
+
+      <div id="projects-pagination-container" class="section"> <!-- Added 'section' class for consistent styling -->
+        <h1 id="major-projects">Major Projects Worked On</h1>
+
+        <div id="project-cards-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
+          <!-- All project cards are now under this div and will be managed by JS -->
+
+          <!-- The Sims 4 -->
+          <div class="project-card">
+            <h3 class="text-2xl font-bold mb-3">The Sims 4</h3>
+            <a href="https://youtu.be/WjPPjU8OARg?si=afPwpC9pQ2SwKA4B" target="_blank" rel="noopener noreferrer">
+              <img src="https://cdn.akamai.steamstatic.com/steam/apps/1222670/header.jpg" alt="The Sims 4 Thumbnail">
+            </a>
+            <p class="mb-2"><strong class="text-gray-900">Genre:</strong> Life Simulation</p>
+            <p class="project-description mb-4">Worked as a feature owner for Quarterly in-game events and New User Experience enhancements. Created test cases, charters, and execution tickets. Conducted A/B testing and user acceptance testing (UAT), and provided feedback on features. Led testing from pre-alpha to QV approval.</p>
+            <div class="mt-4">
+              <p class="text-lg font-semibold text-white">Available on Platforms: PC, PlayStation, Xbox</p>
+            </div>
+          </div>
+
+          <!-- Marvel's Guardians of the Galaxy -->
+          <div class="project-card">
+            <h3 class="text-2xl font-bold mb-3">Marvel's Guardians of the Galaxy</h3>
+            <a href="https://www.youtube.com/watch?v=Q0fdMDwhVzk" target="_blank" rel="noopener noreferrer">
+              <img src="https://wallpapercave.com/wp/wp9545818.jpg" alt="Guardians of the Galaxy Thumbnail">
+            </a>
+            <p class="mb-2"><strong class="text-gray-900">Genre:</strong> Action-Adventure / Third-Person Combat</p>
+            <p class="project-description mb-4">Handled core functionality testing during Alpha and Beta stages across PS, Xbox, and PC. Led a team of 20 testers, created test plans, managed execution, and reported on progress.</p>
+            <div class="mt-4">
+              <p class="text-lg font-semibold text-white">Available on Platforms: PC, PlayStation, Xbox</p>
+            </div>
+          </div>
+
+          <!-- Garfield Lasagna Party -->
+          <div class="project-card">
+            <h3 class="text-2xl font-bold mb-3">Garfield Lasagna Party</h3>
+            <a href="https://www.youtube.com/watch?v=XHBJz_RaWXU" target="_blank" rel="noopener noreferrer">
+            <img src="https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2008410/header.jpg?t=1675957180" alt="Garfield Lasagna Party Thumbnail">
+            </a>
+            <p class="mb-2"><strong class="text-gray-900">Genre:</strong> Local Multiplayer / Party Game</p>
+            <p class="project-description mb-4">Led Functionality and Third-Party Certification Testing for Microsoft consoles. Managed a team of 6, ensured task coordination, issue resolution, and stakeholder communication.</p>
+            <div class="mt-4">
+              <p class="text-lg font-semibold text-white">Available on Platforms: PC, PlayStation, Xbox, Nintendo Switch</p>
+            </div>
+          </div>
+
+          <!-- Tiny Troopers Global Ops -->
+          <div class="project-card">
+            <h3 class="text-2xl font-bold mb-3">Tiny Troopers Global Ops</h3>
+            <a href="https://www.youtube.com/watch?v=n1jk1NXcCRU" target="_blank" rel="noopener noreferrer">
+              <img src="https://assets-prd.ignimgs.com/2022/10/17/ttgo-keyart-16x9-1080p-1666049555200.png?crop=16%3A9&width=888" alt="Tiny Troopers Global Ops Thumbnail">
+            </a>
+            <p class="mb-2"><strong class="text-gray-900">Genre:</strong> Top-Down Shooter / Action</p>
+            <p class="project-description mb-4">Oversaw the complete test cycle, ensured bug-free gameplay, executed comprehensive test plans, reported key issues, and created daily test cycle reports.</p>
+            <div class="mt-4">
+              <p class="text-lg font-semibold text-white">Available on Platforms: PC, PlayStation, Xbox, Nintendo Switch</p>
+            </div>
+          </div>
+
+          <!-- Olympics Go Paris 2024 -->
+          <div class="project-card">
+            <h3 class="text-2xl font-bold mb-3">Olympics Go Paris 2024</h3>
+            <a href="https://www.youtube.com/watch?v=yhcPryGi5tM" target="_blank" rel="noopener noreferrer">
+              <img src="https://static.wixstatic.com/media/0de4af_630268fba55045fca712b4e92a316b70~mv2.jpg" alt="Olympics Go Paris 2024 Thumbnail">
+            </a>
+            <p class="mb-2"><strong class="text-gray-900">Genre:</strong> Sports Simulation</p>
+            <p class="project-description mb-4">Performed functionality, performance, and compatibility testing on the PC (Epic Games). Shared gameplay feedback to enhance the overall user experience.</p>
+            <div class="mt-4">
+              <p class="text-lg font-semibold text-white">Available on Platforms: PC, PlayStation, Xbox, Nintendo Switch</p>
+            </div>
+          </div>
+
+          <!-- Arcade Paradise -->
+          <div class="project-card">
+            <h3 class="text-2xl font-bold mb-3">Arcade Paradise</h3>
+            <a href="https://www.youtube.com/watch?v=500SgaGO3j0" target="_blank" rel="noopener noreferrer">
+              <img src="https://images4.alphacoders.com/125/1259636.jpg" alt="Arcade Paradise Thumbnail">
+            </a>
+            <p class="mb-2"><strong class="text-gray-900">Genre:</strong> Simulation / Management</p>
+            <p class="project-description mb-4">Tested the transformation from laundromat to arcade business in this sim/management game. Verified mechanics, retro-inspired mini-games, and progression systems.</p>
+            <div class="mt-4">
+              <p class="text-lg font-semibold text-white">Available on Platforms: PC, PlayStation, Xbox, Nintendo Switch</p>
+            </div>
+          </div>
+
+          <!-- SpiderHeck -->
+          <div class="project-card">
+            <h3 class="text-2xl font-bold mb-3">SpiderHeck</h3>
+            <a href="https://www.youtube.com/watch?v=U8cnH1nNyrk" target="_blank" rel="noopener noreferrer">
+              <img src="https://cdn.akamai.steamstatic.com/steam/apps/1329500/header.jpg" alt="SpiderHeck Thumbnail">
+            </a>
+            <p class="mb-2"><strong class="text-gray-900">Genre:</strong> Physics Brawler / Action</p>
+            <p class="project-description mb-4">Tested this fast-paced, physics-based brawler focused on player combat, parkour mechanics, and co-op gameplay.</p>
+            <div class="mt-4">
+              <p class="text-lg font-semibold text-white">Available on Platforms: PC, PlayStation, Xbox, Nintendo Switch</p>
+            </div>
+          </div>
+
+          <!-- Koh-Lanta -->
+          <div class="project-card">
+            <h3 class="text-2xl font-bold mb-3">Koh-Lanta</h3>
+            <a href="https://www.youtube.com/watch?v=fA-loSXSd2c" target="_blank" rel="noopener noreferrer">
+              <img src="https://img-eshop.cdn.nintendo.net/i/0fb34548697069216f4c7ae61641c848a6f9b706681dfe749514f507465f4310.jpg" alt="Koh-Lanta Thumbnail">
+            </a>
+            <p class="mb-2"><strong class="text-gray-900">Genre:</strong> Adventure / Survival</p>
+            <p class="project-description mb-4">Tested survival elements, alliance systems, and challenge mechanics. Evaluated performance and balance.</p>
+            <div class="mt-4">
+              <p class="text-lg font-semibold text-white">Available on Platforms: PC, PlayStation, Xbox, Nintendo Switch</p>
+            </div>
+          </div>
+
+          <!-- Tintin Reporter: Cigars of the Pharaoh -->
+          <div class="project-card">
+            <h3 class="text-2xl font-bold mb-3">Tintin Reporter: Cigars of the Pharaoh</h3>
+            <a href="https://www.youtube.com/watch?v=5ZcMReTqZKw" target="_blank" rel="noopener noreferrer">
+              <img src="https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2125090/capsule_616x353.jpg?t=1722245260" alt="Tintin Reporter Thumbnail">
+            </a>
+            <p class="mb-2"><strong class="text-gray-900">Genre:</strong> Adventure</p>
+            <p class="project-description mb-4">Join Tintin and his faithful companion Snowy as they embark on an extraordinary adventure. After meeting Professor Sarcophagus, the famous reporter sets out in search of the tomb of the Pharaoh Kih-Oskh and investigates a gigantic drug trafficking network spanning from Egypt to India.</p>
+            <div class="mt-4">
+              <p class="text-lg font-semibold text-white">Available on Platforms: PC, PlayStation, Xbox, Nintendo Switch</p>
+            </div>
+          </div>
+
+          <!-- Arkanoid Eternal Battle -->
+          <div class="project-card">
+            <h3 class="text-2xl font-bold mb-3">Arkanoid Eternal Battle</h3>
+            <a href="https://www.youtube.com/watch?v=MMuAe5zwTtE" target="_blank" rel="noopener noreferrer">
+              <img src="https://www.microids.com/wp-content/uploads/2022/10/Arkanoid-Eternal-Battle-Keyart.jpg" alt="Arkanoid Eternal Battle Thumbnail">
+            </a>
+            <p class="mb-2"><strong class="text-gray-900">Genre:</strong> Arcade / Action</p>
+            <p class="project-description mb-4">Discover or re-discover the iconic block breaker game in a fully modernized version. Classic elements return with a brand-new look, new rules, effects, bonuses, and features, including a Battle Royale mode called “Eternal Battle” where 25 players can compete online.</p>
+            <div class="mt-4">
+              <p class="text-lg font-semibold text-white">Available on Platforms: PC, PlayStation, Xbox, Nintendo Switch</p>
+            </div>
+          </div>
+
+          <!-- Marsupilami: Hoobadventure -->
+          <div class="project-card">
+            <h3 class="text-2xl font-bold mb-3">Marsupilami: Hoobadventure</h3>
+            <a href="https://www.youtube.com/watch?v=w75lw9L0cAQ" target="_blank" rel="noopener noreferrer">
+              <img src="https://images.squarespace-cdn.com/content/55ef0e29e4b099e22cdc9eea/1636972351714-5T6HPZBLSW58GTGJG7ZH/MH-logo.jpg?content-type=image%2Fjpeg" alt="Marsupilami Thumbnail">
+            </a>
+            <p class="mb-2"><strong class="text-gray-900">Genre:</strong> Platformer / Adventure</p>
+            <p class="project-description mb-4">Punch, Twister, and Hope are three Marsupilamis who inadvertently release a mysterious ghost from a cursed sarcophagus, placing a terrible curse on all animals. They must embark on an adventure to chase the ghost and ward off the spell, exploring colorful worlds including a new dimension with dinosaurs in the "The Hidden World" expansion.</p>
+            <div class="mt-4">
+              <p class="text-lg font-semibold text-white">Available on Platforms: PC, PlayStation, Xbox, Nintendo Switch</p>
+            </div>
+          </div>
+
+          <!-- Operation Wolf Returns -->
+          <div class="project-card">
+            <h3 class="text-2xl font-bold mb-3">Operation Wolf Returns</h3>
+            <a href="http://youtube.com/watch?v=vuYW8SGEVLg" target="_blank" rel="noopener noreferrer">
+              <img src="https://w0.peakpx.com/wallpaper/911/635/HD-wallpaper-operation-wolf-returns-first-mission-games.jpg" alt="Operation Wolf Returns Thumbnail">
+            </a>
+            <p class="mb-2"><strong class="text-gray-900">Genre:</strong> Shooter / Arcade</p>
+            <p class="project-description mb-4">A reinterpretation of the cult 1987 arcade rail shooter, "Operation Wolf Returns: First Mission" adopts the original game's DNA of sustained action in an 80s action film atmosphere but with a new design. Two agents are dispatched to learn about a new superpowerful weapon developed by a criminal organization and free hostages held in surrounding camps.</p>
+            <div class="mt-4">
+              <p class="text-lg font-semibold text-white">Available on Platforms: PC, PlayStation, Xbox, Nintendo Switch</p>
+            </div>
+          </div>
+
+          <!-- Kao the Kangaroo -->
+          <div class="project-card">
+            <h3 class="text-2xl font-bold mb-3">Kao the Kangaroo</h3>
+            <a href="https://www.youtube.com/watch?v=Ld9FVoL_5XI" target="_blank" rel="noopener noreferrer">
+              <img src="https://images.wallpapersden.com/image/download/kao-the-kangaroo-2_bWhtaWeUmZqaraWkpJRnamtlrWZpaWU.jpg" alt="Kao the Kangaroo Thumbnail" />
+            </a>
+            <p class="mb-2"><strong class="text-gray-900">Genre:</strong> Platformer / Adventure</p>
+            <p class="project-description mb-4">Kao the Kangaroo is a 3D action platformer where players control Kao, a boxing kangaroo who embarks on a journey to find his missing sister and uncover the secret of his long-lost father. He must battle various "fighting masters" influenced by a dark power, ultimately facing the powerful Eternal Warrior.</p>
+            <div class="mt-4">
+              <p class="text-lg font-semibold text-white">Available on Platforms: PC, PlayStation, Xbox, Nintendo Switch</p>
+            </div>
+          </div>
+
+          <!-- Smurf Village Party -->
+          <div class="project-card">
+            <h3 class="text-2xl font-bold mb-3">Smurf Village Party</h3>
+            <a href="https://www.youtube.com/watch?v=c4gN0nRlVMU" target="_blank" rel="noopener noreferrer">
+              <img src="https://gaming-cdn.com/images/products/16291/orig/the-smurfs-village-party-xbox-one-xbox-series-x-s-game-microsoft-store-cover.jpg?v=1739352644" alt="Smurf Village Party Thumbnail" />
+            </a>
+            <p class="mb-2"><strong class="text-gray-900">Genre:</strong> Party / Casual</p>
+            <p class="project-description mb-4">Papa Smurf is organizing an exceptional party, and players must help by inviting all Smurfs scattered around the world while being careful of Gargamel. The game features 50 mini-games for 2-4 local multiplayer in party-game mode, and an adventure mode with an original story, over 100 iconic Smurfs, and 10 diverse environments.</p>
+            <div class="mt-4">
+              <p class="text-lg font-semibold text-white">Available on Platforms: PC, PlayStation, Xbox, Nintendo Switch</p>
+            </div>
+          </div>
+
+          <!-- XIII (Thirteen) -->
+          <div class="project-card">
+            <h3 class="text-2xl font-bold mb-3">XIII (Thirteen)</h3>
+            <a href="https://www.youtube.com/watch?v=z6NIMG2vNbU" target="_blank" rel="noopener noreferrer">
+              <img src="https://www.mkaugaming.com/wp-content/uploads/2020/06/2020-06-15_00003.jpg" alt="XIII Thumbnail" />
+            </a>
+            <p class="mb-2"><strong class="text-gray-900">Genre:</strong> First-Person Shooter / Action</p>
+            <p class="project-description mb-4">A remake of the cult 2003 first-person action game, XIII puts players in the shoes of "XIII," a man with no identity, in a solo campaign full of twists. Inspired by the graphic novel, the game features a reinvented cel-shading design, a conspiracy-based plot, and varied gameplay combining action, infiltration, and exploration.</p>
+            <div class="mt-4">
+              <p class="text-lg font-semibold text-white">Available on Platforms: PC, PlayStation, Xbox, Nintendo Switch</p>
+            </div>
+          </div>
+
+          <!-- Syberia: The World Before -->
+          <div class="project-card">
+            <h3 class="text-2xl font-bold mb-3">Syberia: The World Before</h3>
+            <a href="https://www.youtube.com/watch?v=L4CIrBygieg" target="_blank" rel="noopener noreferrer">
+              <img src="https://images7.alphacoders.com/125/1250242.jpg" alt="Syberia: The World Before Thumbnail" />
+            </a>
+            <p class="mb-2"><strong class="text-gray-900">Genre:</strong> Adventure / Puzzle</p>
+            <p class="project-description mb-4">The fourth installment in the Syberia series, this graphic adventure follows two intertwined storylines: Dana Roze, a young pianist in 1937 Osterthal, and Kate Walker, the series protagonist, imprisoned in a salt mine. Players uncover mysteries tied to flashbacks and explore a rich narrative dedicated to the memory of creator Benoît Sokal.</p>
+            <div class="mt-4">
+              <p class="text-lg font-semibold text-white">Available on Platforms: PC, PlayStation, Xbox, Nintendo Switch</p>
+            </div>
+          </div>
+
+          <!-- Alfred Hitchcock – Vertigo -->
+          <div class="project-card">
+            <h3 class="text-2xl font-bold mb-3">Alfred Hitchcock – Vertigo</h3>
+            <a href="https://www.youtube.com/watch?v=fPKAk8ODh54" target="_blank" rel="noopener noreferrer">
+              <img src="https://fingerguns.net/wp-content/uploads/2022/09/IMG_3813-scaled.jpg" alt="Alfred Hitchcock – Vertigo Thumbnail" />
+            </a>
+            <p class="mb-2"><strong class="text-gray-900">Genre:</strong> Adventure / Mystery</p>
+            <p class="project-description mb-4">This adventure game is loosely inspired by Alfred Hitchcock's film "Vertigo." It tells the story of Ed Miller, a writer who emerges unscathed from a car crash but insists his wife and daughter were with him, despite no one else being found. Traumatized and suffering from severe vertigo, he enters therapy to uncover what truly happened, blurring the lines between reality and fantasy.</p>
+            <div class="mt-4">
+              <p class="text-lg font-semibold text-white">Available on Platforms: PC, PlayStation, Xbox, Nintendo Switch</p>
+            </div>
+          </div>
+
+          <!-- Agatha Christie – Murder on the Orient Express -->
+          <div class="project-card">
+            <h3 class="text-2xl font-bold mb-3">Agatha Christie – Murder on the Orient Express</h3>
+            <a href="https://www.youtube.com/watch?v=9KpjBqnDvV4" target="_blank" rel="noopener noreferrer">
+              <img src="https://www.nintendo.com/eu/media/images/10_share_images/games_15/nintendo_switch_4/2x1_NSwitch_AgathaChristieMurderOnTheOrientExpress_image1600w.jpg" alt="Agatha Christie – Murder on the Orient Express Thumbnail" />
+            </a>
+            <p class="mb-2"><strong class="text-gray-900">Genre:</strong> Adventure / Mystery</p>
+            <p class="project-description mb-4">Set in 2023, this modern adaptation of Agatha Christie's classic mystery challenges players to help legendary detective Hercule Poirot solve a murder aboard the prestigious Orient Express. Surrounded by intriguing characters, players must use their "little grey cells" and detective skills to uncover clues, make deductions, and unravel the truth behind one of literary history's most renowned plot twists, with additional elements and a new character, Joanna Locke.</p>
+            <div class="mt-4">
+              <p class="text-lg font-semibold text-white">Available on Platforms: PC, PlayStation, Xbox, Nintendo Switch</p>
+            </div>
+          </div>
+
+          <!-- UFO Robot Grendizer -->
+          <div class="project-card">
+            <h3 class="text-2xl font-bold mb-3">UFO Robot Grendizer</h3>
+            <a href="https://www.youtube.com/watch?v=au1zHSJ2uMA" target="_blank" rel="noopener noreferrer">
+              <img src="https://www.nintendo.com/eu/media/images/10_share_images/games_15/nintendo_switch_download_software_1/2x1_NSwitchDS_UFORobotGrendizer.jpg" alt="UFO Robot Grendizer Thumbnail" />
+            </a>
+            <p class="mb-2"><strong class="text-gray-900">Genre:</strong> Mecha / Action</p>
+            <p class="project-description mb-4">For the very first time, play as Grendizer and Umon Daisuke in this action/adventure game adapted from the cult animated series. Experience an unforgettable adventure battling the forces of Vega to save Earth, with multiple gameplay phases including piloting the Spazer, vertical shoot-em-up in Kôji Kabuto's TFO, and 3rd person action/combat controlling Grendizer himself.</p>
+            <div class="mt-4">
+              <p class="text-lg font-semibold text-white">Available on Platforms: PC, PlayStation, Xbox, Nintendo Switch</p>
+            </div>
+          </div>
+
+          <!-- Asterix & Obelix: XXXL -->
+          <div class="project-card">
+            <h3 class="text-2xl font-bold mb-3">Asterix & Obelix: XXXL</h3>
+            <a href="https://www.youtube.com/watch?v=95jwvslaySo" target="_blank" rel="noopener noreferrer">
+              <img src="https://image.api.playstation.com/vulcan/ap/rnd/202208/2309/ZhFk5WetZ30FO33CgVbpn3bw.jpg" alt="Asterix & Obelix: XXXL Thumbnail" />
+            </a>
+            <p class="mb-2"><strong class="text-gray-900">Genre:</strong> Action / Adventure</p>
+            <p class="project-description mb-4">Join Asterix and Obelix in a brand-new original story set in Hibernia (modern-day Ireland). Chief Irishcoffix's daughter, Keratine, calls for their help to overcome a Roman invasion and retrieve her father's beloved golden ram. Control your favorite heroes, use your fists and environmental objects, and smash Romans in this action-adventure game with local co-op up to 4 players.</p>
+            <div class="mt-4">
+              <p class="text-lg font-semibold text-white">Available on Platforms: PC, PlayStation, Xbox, Nintendo Switch</p>
+            </div>
+          </div>
+
+          <!-- Smurfs Kart -->
+          <div class="project-card">
+            <h3 class="text-2xl font-bold mb-3">Smurfs Kart</h3>
+            <a href="https://www.youtube.com/watch?v=MDCCchiD8SE" target="_blank" rel="noopener noreferrer">
+              <img src="https://images3.alphacoders.com/128/1288855.jpg" alt="Smurfs Kart Thumbnail" />
+            </a>
+            <p class="mb-2"><strong class="text-gray-900">Genre:</strong> Racing / Casual</p>
+            <p class="project-description mb-4">"Who will be the fastest Smurf in town?" is the question in this dynamic kart racing game set in the Smurfs' world. Choose your favorite Smurf, their kart, and special power, then race on 12 tracks from the Smurfs' universe. Make the best start, find shortcuts, and use items to pass opponents in solo or local split-screen multiplayer.</p>
+            <div class="mt-4">
+              <p class="text-lg font-semibold text-white">Available on Platforms: PC, PlayStation, Xbox, Nintendo Switch</p>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Pagination Controls -->
+        <div class="pagination-controls flex justify-center mt-12 space-x-6">
+          <button id="prevBtn" class="px-8 py-3">Previous</button>
+          <span id="page-number-display"></span> <!-- Added for page number display -->
+          <button id="nextBtn" class="px-8 py-3">Next</button>
+        </div>
+      </div>
+
+      <!-- New Skills & Technology Section -->
+      <div class="section">
+        <h2 id="skills">🛠️ Skills & Technology</h2>
+        <ul class="skills-list">
+          <li>Manual Testing</li>
+          <li>Functional Testing</li>
+          <li>Regression Testing</li>
+          <li>Sanity Testing</li>
+          <li>Smoke Testing</li>
+          <li>UAT (User Acceptance Testing)</li>
+          <li>Integration Testing</li>
+          <li>A/B Testing</li>
+          <li>Retesting</li>
+          <li>Black-box Testing</li>
+          <li>Test Plans</li>
+          <li>Test Scenarios</li>
+          <li>Test Cases</li>
+          <li>Test Reports</li>
+          <li>STLC (Software Testing Life Cycle)</li>
+          <li>Defect Lifecycle</li>
+          <li>Agile Methodology</li>
+        </ul>
+      </div>
+
+      <!-- New Tools & Technology Section -->
+      <div class="section">
+        <h2 id="tools">🔧 Tools</h2>
+        <ul class="tools-list">
+          <li>JIRA</li>
+          <li>JAAS</li>
+          <li>QMetry</li>
+          <li>Confluence</li>
+          <li>Mantis</li>
+          <li>PS-SDK</li>
+          <li>Xbox-GDK</li>
+          <li>Nexus</li>
+          <li>Holocron</li>
+          <li>MS office tools</li>
+        </ul>
+      </div>
+
+      <!-- New Platforms Tested On Section -->
+      <div class="section">
+        <h2 id="platforms" class="platforms-header">Platforms Tested On</h2>
+        <ul class="platforms-list">
+          <li class="pc-platform">PC (Steam, EPIC, EA)</li>
+          <li class="playstation-platform">PlayStation 4 & 5</li>
+          <li class="xbox-platform">Xbox One & Series X</li>
+          <li class="switch-platform">Nintendo Switch</li>
+        </ul>
+      </div>
+
+      <!-- New combined section: Summary and Call to Action -->
+      <div class="section">
+        <h2 id="contact">🚀 Ready to Level Up Your Team?</h2>
+        <p>With a proven track record in comprehensive game testing across multiple platforms and a deep understanding of the full STLC, I am confident in my ability to significantly contribute to the quality and success of your next gaming project. My blend of technical expertise, leadership experience, and passion for delivering flawless player experiences makes me an invaluable asset to any development team.</p>
+        <p class="mt-4">Let's connect and discuss how my skills can help bring your games to market with the highest level of quality. I'm always eager to take on new challenges and ensure your players have an exceptional experience.</p>
+        <p class="mt-4 text-lg font-semibold text-white">Reach out to me directly:</p>
+        <p><strong>Email:</strong> akshay.23696@gmail.com</p>
+        <p><strong>Phone:</strong> +91-9665243104</p>
+        <p><strong>LinkedIn:</strong> <a href="https://www.linkedin.com/in/akshay-kurle-25a626a5/" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:underline">Akshay Kurle</a></p>
+        <p><strong>Instagram:</strong> ig_ak_</p>
+      </div>
+
+      <!-- Footer -->
+      <footer>
+        <p>&copy; 2025 Akshay Kurle. All rights reserved.</p>
+      </footer>
+    </div>
+
+    <!-- Handheld Console Sidebar (Index) -->
+    <aside id="handheld-console-sidebar">
+        <div class="console-screen">
+            <ul>
+                <li><a href="#about-me">About Me</a></li>
+                <li><a href="#experience">Experience</a></li>
+                <li><a href="#major-projects">Projects</a></li>
+                <li><a href="#skills">Skills</a></li>
+                <li><a href="#tools">Tools</a></li>
+                <li><a href="#platforms">Platforms</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </div>
+        <div class="dpad-container">
+            <div class="dpad-button dpad-up" data-direction="up"></div>
+            <div class="dpad-button dpad-left" data-direction="left"></div>
+            <div class="dpad-center"></div>
+            <div class="dpad-button dpad-right" data-direction="right"></div>
+            <div class="dpad-button dpad-down" data-direction="down"></div>
+        </div>
+    </aside>
+  </div>
+
+  <script>
+    // Define how many projects to show per page
+    const cardsPerPage = 2; // Set to 2 games per page as requested
+    // Select all project card elements within the #project-cards-grid container
+    const projectCards = Array.from(document.querySelectorAll('#project-cards-grid > .project-card'));
+    // Initialize the current page number
+    let currentPage = 1;
+    // Calculate the total number of pages needed
+    const totalPages = Math.ceil(projectCards.length / cardsPerPage);
+
+    // Get the element for displaying page numbers
+    const pageNumberDisplay = document.getElementById('page-number-display');
+
+    /**
+     * Shows a specific page of project cards and updates button states and page number display.
+     * @param {number} page The page number to display.
+     */
+    function showPage(page) {
+      // Update the current page tracker
+      currentPage = page;
+      // Calculate the starting and ending index for the cards on the current page
+      const start = (page - 1) * cardsPerPage;
+      const end = start + cardsPerPage;
+
+      // Iterate through all project cards
+      projectCards.forEach((card, index) => {
+        // If the card's index falls within the current page's range, show it; otherwise, hide it.
+        if (index >= start && index < end) {
+          card.style.display = 'flex'; /* Changed from 'block' to 'flex' due to new CSS */
+          // Re-apply animation by resetting and then setting opacity/transform
+          card.style.opacity = '0';
+          card.style.transform = 'translateY(25px)';
+          setTimeout(() => {
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+          }, 50); // Small delay to ensure display:block is applied before animation
+        } else {
+          card.style.display = 'none';
+        }
+      });
+
+      // Update the page number display
+      pageNumberDisplay.textContent = `Page ${currentPage} of ${totalPages}`;
+
+      // Disable 'Previous' button if on the first page
+      document.getElementById('prevBtn').disabled = (currentPage === 1);
+      // Disable 'Next' button if on the last page
+      document.getElementById('nextBtn').disabled = (currentPage === totalPages);
+    }
+
+    // Add event listener for the 'Previous' button
+    document.getElementById('prevBtn').addEventListener('click', () => {
+      // If not on the first page, decrement currentPage and show the new page
+      if (currentPage > 1) {
+        showPage(currentPage - 1);
+      }
+    });
+
+    // Add event listener for the 'Next' button
+    document.getElementById('nextBtn').addEventListener('click', () => {
+      // If not on the last page, increment currentPage and show the new page
+      if (currentPage < totalPages) {
+        showPage(currentPage + 1);
+      }
+    }
+    );
+
+    // Initialize the display by showing the first page when the script loads
+    showPage(currentPage);
+
+
+    // --- Background Canvas Animation Logic: PS and Xbox Controllers ---
+    const canvas = document.getElementById('backgroundCanvas');
+    const ctx = canvas.getContext('2d');
+
+    let controllers = [];
+    const numControllers = 30; // Number of controllers in the animation
+    const controllerTypes = ['🎮', '🕹️']; // Generic controller emojis
+    const minControllerSize = 30;
+    const maxControllerSize = 80;
+    const minSpeed = 0.5;
+    const maxSpeed = 2;
+
+    // Function to resize canvas to full window dimensions
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      ctx.font = `${maxControllerSize}px sans-serif`; // Set a large font for emojis
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+    }
+
+    // Controller constructor function
+    function Controller() {
+      this.x = Math.random() * canvas.width;
+      this.y = Math.random() * canvas.height;
+      this.size = Math.random() * (maxControllerSize - minControllerSize) + minControllerSize;
+      this.type = controllerTypes[Math.floor(Math.random() * controllerTypes.length)];
+      this.opacity = 0.1 + Math.random() * 0.4; // Varying transparency
+      this.speedX = (Math.random() - 0.5) * (maxSpeed - minSpeed) * 2 + minSpeed * Math.sign(Math.random() - 0.5); // Random horizontal speed, can be negative
+      this.speedY = (Math.random() - 0.5) * (maxSpeed - minSpeed) * 2 + minSpeed * Math.sign(Math.random() - 0.5); // Random vertical speed, can be negative
+      this.rotation = Math.random() * Math.PI * 2; // Initial random rotation
+      this.rotationSpeed = (Math.random() - 0.5) * 0.02; // Small random rotation speed
+    }
+
+    // Update controller position and rotation
+    Controller.prototype.update = function() {
+      this.x += this.speedX;
+      this.y += this.speedY;
+      this.rotation += this.rotationSpeed;
+
+      // Reset controller if it goes off-screen
+      if (this.x < -this.size || this.x > canvas.width + this.size ||
+          this.y < -this.size || this.y > canvas.height + this.size) {
+        this.reset();
+      }
+    };
+
+    // Reset controller to a random position off-screen
+    Controller.prototype.reset = function() {
+        // Randomly decide which edge to reset from
+        const edge = Math.floor(Math.random() * 4); // 0: top, 1: right, 2: bottom, 3: left
+
+        switch (edge) {
+            case 0: // Top
+                this.x = Math.random() * canvas.width;
+                this.y = -this.size;
+                this.speedY = Math.random() * (maxSpeed - minSpeed) + minSpeed;
+                this.speedX = (Math.random() - 0.5) * (maxSpeed - minSpeed) * 2;
+                break;
+            case 1: // Right
+                this.x = canvas.width + this.size;
+                this.y = Math.random() * canvas.height;
+                this.speedX = -(Math.random() * (maxSpeed - minSpeed) + minSpeed);
+                this.speedY = (Math.random() - 0.5) * (maxSpeed - minSpeed) * 2;
+                break;
+            case 2: // Bottom
+                this.x = Math.random() * canvas.width;
+                this.y = canvas.height + this.size;
+                this.speedY = -(Math.random() * (maxSpeed - minSpeed) + minSpeed);
+                this.speedX = (Math.random() - 0.5) * (maxSpeed - minSpeed) * 2;
+                break;
+            case 3: // Left
+                this.x = -this.size;
+                this.y = Math.random() * canvas.height;
+                this.speedX = Math.random() * (maxSpeed - minSpeed) + minSpeed;
+                this.speedY = (Math.random() - 0.5) * (maxSpeed - minSpeed) * 2;
+                break;
+        }
+        this.size = Math.random() * (maxControllerSize - minControllerSize) + minControllerSize;
+        this.type = controllerTypes[Math.floor(Math.random() * controllerTypes.length)];
+        this.opacity = 0.1 + Math.random() * 0.4;
+        this.rotation = Math.random() * Math.PI * 2;
+        this.rotationSpeed = (Math.random() - 0.5) * 0.02;
+    };
+
+    // Draw controller
+    Controller.prototype.draw = function() {
+      ctx.save(); // Save current canvas state
+      ctx.translate(this.x, this.y); // Move origin to controller's center
+      ctx.rotate(this.rotation); // Rotate around its center
+      ctx.globalAlpha = this.opacity; // Apply transparency
+      ctx.font = `${this.size}px sans-serif`; // Set font size based on controller size
+      ctx.fillText(this.type, 0, 0); // Draw the emoji at the new origin (0,0)
+      ctx.restore(); // Restore canvas state
+    };
+
+    // Initialize controllers
+    function initControllers() {
+      for (let i = 0; i < numControllers; i++) {
+        controllers.push(new Controller());
+      }
+    }
+
+    // Animation loop
+    function animateControllers() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas
+
+      controllers.forEach(controller => {
+        controller.update();
+        controller.draw();
+      });
+
+      requestAnimationFrame(animateControllers); // Loop the animation
+    }
+
+    // Event listeners for resizing
+    window.addEventListener('resize', () => {
+      resizeCanvas();
+      // On resize, reset all controllers to ensure they appear correctly within new bounds
+      controllers = [];
+      initControllers();
+    });
+
+    // Start the background animation when the window loads
+    window.onload = function() {
+      resizeCanvas();
+      initControllers();
+      animateControllers();
+      attachDpadListeners(); // Attach event listeners for D-pad
+
+      // Trigger the slide-in animation for the sidebar
+      const sidebar = document.getElementById('handheld-console-sidebar');
+      // Only apply slide-in if it's visible (i.e., on larger screens)
+      if (window.innerWidth >= 1024) { // Matches the lg breakpoint in CSS
+         sidebar.classList.add('slide-in');
+      }
+    };
+
+    // --- Handheld Console D-Pad and Menu Navigation ---
+    function attachDpadListeners() {
+        const menuLinks = document.querySelectorAll('#handheld-console-sidebar ul li a');
+        let currentSelectedIndex = -1; // -1 means no item is selected
+
+        // Function to update the active class on menu items
+        function updateActiveMenuItem() {
+            menuLinks.forEach((link, index) => {
+                if (index === currentSelectedIndex) {
+                    link.classList.add('active');
+                    link.focus(); // Set focus for keyboard navigation
+                } else {
+                    link.classList.remove('active');
+                }
+            });
+            // Scroll to the focused element if it's outside the view
+            if (currentSelectedIndex !== -1) {
+                menuLinks[currentSelectedIndex].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        }
+
+        // Initialize active state (optional, can start with first item selected)
+        if (menuLinks.length > 0) {
+            currentSelectedIndex = 0; // Start with the first item selected
+            updateActiveMenuItem();
+        }
+
+        document.querySelectorAll('.dpad-button').forEach(button => {
+            button.addEventListener('click', function() {
+                const direction = this.dataset.direction;
+                if (menuLinks.length === 0) return; // No links to navigate
+
+                switch (direction) {
+                    case 'up':
+                        currentSelectedIndex = (currentSelectedIndex - 1 + menuLinks.length) % menuLinks.length;
+                        break;
+                    case 'down':
+                        currentSelectedIndex = (currentSelectedIndex + 1) % menuLinks.length;
+                        break;
+                    case 'left':
+                        // Scroll to the About Me section
+                        const aboutMeSection = document.getElementById('about-me');
+                        if (aboutMeSection) {
+                            aboutMeSection.scrollIntoView({ behavior: 'smooth' });
+                        }
+                        return; // Prevent further action for left/right
+                    case 'right':
+                        // For right, we'll simulate an "enter" or "select" action
+                        // In this case, simply trigger the click on the currently active link
+                        if (currentSelectedIndex !== -1) {
+                            menuLinks[currentSelectedIndex].click();
+                        }
+                        return; // Prevent further action for left/right
+                }
+                updateActiveMenuItem();
+            });
+        });
+
+        // Add keyboard navigation for the menu (optional but good for accessibility)
+        document.addEventListener('keydown', (event) => {
+            if (menuLinks.length === 0) return;
+
+            if (document.activeElement && document.activeElement.closest('#handheld-console-sidebar')) {
+                // Only act if focus is currently within the sidebar
+                if (event.key === 'ArrowUp') {
+                    event.preventDefault(); // Prevent page scrolling
+                    currentSelectedIndex = (currentSelectedIndex - 1 + menuLinks.length) % menuLinks.length;
+                    updateActiveMenuItem();
+                } else if (event.key === 'ArrowDown') {
+                    event.preventDefault(); // Prevent page scrolling
+                    currentSelectedIndex = (currentSelectedIndex + 1) % menuLinks.length;
+                    updateActiveMenuItem();
+                } else if (event.key === 'ArrowLeft') { // Added ArrowLeft for keyboard to scroll to About Me
+                    event.preventDefault();
+                    const aboutMeSection = document.getElementById('about-me');
+                    if (aboutMeSection) {
+                        aboutMeSection.scrollIntoView({ behavior: 'smooth' });
+                    }
+                }
+                 else if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault(); // Prevent default button click behavior
+                    if (currentSelectedIndex !== -1) {
+                        menuLinks[currentSelectedIndex].click(); // Simulate click on active item
+                    }
+                }
+            }
+        });
+    }
+  </script>
+</body>
+</html>

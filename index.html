@@ -14,7 +14,7 @@
     /* Global styles for a consistent dark theme inspired by Unreal Engine aesthetics */
     body {
       font-family: 'Inter', sans-serif; /* Primary font for body text */
-      background-color: hsl(222, 13%, 12%); /* Reverted to very dark desaturated blue-grey */
+      background-color: hsl(222, 13%, 12%); /* Very dark desaturated blue-grey */
       color: #E2E8F0; /* Light text color for contrast (slate-200) */
       margin: 0;
       padding: 0;
@@ -36,7 +36,7 @@
       width: 100%;
       height: 100%;
       z-index: -1; /* Place it behind all content */
-      background-color: hsl(222, 13%, 12%); /* Reverted to base background color for canvas */
+      background-color: hsl(222, 13%, 12%); /* Base background color for canvas */
     }
 
     /* Header styling */
@@ -56,6 +56,7 @@
       margin: 0 auto; /* Center the content */
       padding: 0 1rem; /* Add some horizontal padding inside the centered content */
       text-align: center; /* Changed to center align header text */
+      position: relative; /* For positioning the menu button */
     }
     header h1 {
       font-family: 'Montserrat', sans-serif; /* Modern bold font */
@@ -68,6 +69,28 @@
     header p {
       color: #A0AEC0; /* Light grey for description (slate-400) */
       font-size: 1.1rem;
+    }
+
+    /* Mobile Menu Button */
+    #mobile-menu-button {
+        position: absolute;
+        top: 2rem;
+        right: 1rem;
+        background-color: hsla(222, 13%, 25%, 0.7);
+        border: 1px solid hsla(0, 0%, 100%, 0.2);
+        border-radius: 10px;
+        padding: 0.5rem;
+        cursor: pointer;
+        z-index: 10; /* Ensure it's above other header content */
+        display: none; /* Hidden by default, shown only on small screens */
+    }
+    #mobile-menu-button:hover {
+        background-color: hsla(222, 13%, 30%, 0.8);
+    }
+    #mobile-menu-button svg {
+        fill: #E2E8F0; /* Icon color */
+        width: 24px;
+        height: 24px;
     }
 
     /* Section common styling */
@@ -333,8 +356,8 @@
     /* Handheld Console Sidebar (Index) Styles */
     #handheld-console-sidebar {
       position: fixed;
-      right: 20px; /* Position from the right */
-      top: 50%; /* Center vertically */
+      right: 20px; /* Position from the right on desktop */
+      top: 50%; /* Center vertically on desktop */
       transform: translateY(-50%) translateX(300px); /* Start off-screen to the right */
       width: 280px; /* Increased width of the console */
       height: 600px; /* Adjusted height for content and D-pad */
@@ -349,12 +372,16 @@
       padding: 20px; /* Internal padding */
       box-sizing: border-box;
       justify-content: space-between; /* Distribute items vertically */
-      transition: transform 1s ease-out; /* Smooth transition for slide-in */
+      transition: transform 1s ease-out; /* Smooth transition for slide-in/out */
     }
 
-    /* Class to apply after initial load to slide in the sidebar */
+    /* Class to apply after initial load to slide in the sidebar on desktop */
     #handheld-console-sidebar.slide-in {
       transform: translateY(-50%) translateX(0); /* Slide into view */
+    }
+    /* Class for mobile to open the sidebar */
+    #handheld-console-sidebar.mobile-open {
+        transform: translateY(-50%) translateX(0); /* Slide into view on mobile */
     }
 
 
@@ -452,16 +479,23 @@
     /* Responsive adjustments */
     @media (max-width: 1023px) { /* Hide sidebar and QA panel on screens smaller than lg breakpoint */
       #handheld-console-sidebar {
-        display: none;
+        display: flex; /* Always display flex on mobile, but control visibility with transform */
+        top: 0; /* Align to top of viewport on mobile */
+        transform: translateX(100%); /* Completely off-screen to the right */
+        right: 0; /* Position from right edge */
+        height: 100vh; /* Full viewport height on mobile */
+        border-radius: 0; /* No rounded corners on full-height mobile sidebar */
       }
-      .qa-status-panel {
-        display: none; /* Hide QA panel on smaller screens */
+      #handheld-console-sidebar.mobile-open {
+          transform: translateX(0); /* Slide into view */
+      }
+      #mobile-menu-button {
+          display: block; /* Show menu button on small screens */
       }
       #portfolio-content-wrapper {
-        margin-right: auto; /* Ensure content takes full width */
+        margin-right: 0; /* Remove desktop margin */
         padding-right: 1rem; /* Consistent padding */
       }
-      /* Removed the specific text-align: center from header .header-content as it's now global */
       header h1 {
         font-size: 2.2rem;
       }
@@ -484,19 +518,35 @@
         #portfolio-content-wrapper {
             margin-right: 310px; /* Increased space for the handheld console */
         }
+        #handheld-console-sidebar {
+            /* Ensure desktop positioning is re-applied */
+            top: 50%;
+            transform: translateY(-50%) translateX(0); /* Slide in on load */
+            right: 20px;
+            height: 600px; /* Original height on desktop */
+            border-radius: 25px; /* Original border radius on desktop */
+        }
+        #handheld-console-sidebar.mobile-open { /* Remove mobile-open effect on desktop */
+            transform: translateY(-50%) translateX(0);
+        }
     }
   </style>
 </head>
 <body>
+  <!-- Background Canvas -->
   <canvas id="backgroundCanvas"></canvas>
 
+  <!-- Main Portfolio Content Wrapper with Responsive Margin for Sidebar -->
   <div class="flex w-full">
     <div id="portfolio-content-wrapper" class="flex-grow mx-auto px-4">
       <header id="top-section">
         <div class="header-content">
           <h1>🎮 Akshay Kurle – Senior Game Tester</h1>
           <p>"Welcome, Player One! Ready to debug destiny and conquer glitches? I'm Akshay, and this is where QA meets high score."</p>
-          <!-- QA Status Panel - REMOVED -->
+          <!-- Mobile Menu Button -->
+          <button id="mobile-menu-button" aria-label="Toggle menu">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
+          </button>
         </div>
       </header>
 
@@ -514,9 +564,13 @@
         As I progressed, I led functionality and compliance testing—especially for SONY consoles—ensuring products met submission requirements. I created detailed test cases, led functional test planning, and mentored new testers. My responsibilities expanded to team management, task delegation, and ensuring timely project deliveries. I also evaluated gameplay quality, including online aspects like latency and downloads, to support a smooth player experience. My role was highly collaborative, involving coordination with cross-functional teams including developers, producers, and certification leads to align quality goals and meet milestones effectively.</p>
       </div>
 
-      <div id="projects-pagination-container" class="section"> <h1 id="major-projects">Major Projects Worked On</h1>
+      <div id="projects-pagination-container" class="section"> <!-- Added 'section' class for consistent styling -->
+        <h1 id="major-projects">Major Projects Worked On</h1>
 
         <div id="project-cards-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
+          <!-- All project cards are now under this div and will be managed by JS -->
+
+          <!-- The Sims 4 -->
           <div class="project-card">
             <h3 class="text-2xl font-bold mb-3">The Sims 4</h3>
             <a href="https://youtu.be/WjPPjU8OARg?si=afPwpC9pQ2SwKA4B" target="_blank" rel="noopener noreferrer">
@@ -529,6 +583,7 @@
             </div>
           </div>
 
+          <!-- Marvel's Guardians of the Galaxy -->
           <div class="project-card">
             <h3 class="text-2xl font-bold mb-3">Marvel's Guardians of the Galaxy</h3>
             <a href="https://www.youtube.com/watch?v=Q0fdMDwhVzk" target="_blank" rel="noopener noreferrer">
@@ -541,6 +596,7 @@
             </div>
           </div>
 
+          <!-- Garfield Lasagna Party -->
           <div class="project-card">
             <h3 class="text-2xl font-bold mb-3">Garfield Lasagna Party</h3>
             <a href="https://www.youtube.com/watch?v=XHBJz_RaWXU" target="_blank" rel="noopener noreferrer">
@@ -553,6 +609,7 @@
             </div>
           </div>
 
+          <!-- Tiny Troopers Global Ops -->
           <div class="project-card">
             <h3 class="text-2xl font-bold mb-3">Tiny Troopers Global Ops</h3>
             <a href="https://www.youtube.com/watch?v=n1jk1NXcCRU" target="_blank" rel="noopener noreferrer">
@@ -565,6 +622,7 @@
             </div>
           </div>
 
+          <!-- Olympics Go Paris 2024 -->
           <div class="project-card">
             <h3 class="text-2xl font-bold mb-3">Olympics Go Paris 2024</h3>
             <a href="https://www.youtube.com/watch?v=yhcPryGi5tM" target="_blank" rel="noopener noreferrer">
@@ -577,6 +635,7 @@
             </div>
           </div>
 
+          <!-- Arcade Paradise -->
           <div class="project-card">
             <h3 class="text-2xl font-bold mb-3">Arcade Paradise</h3>
             <a href="https://www.youtube.com/watch?v=500SgaGO3j0" target="_blank" rel="noopener noreferrer">
@@ -589,6 +648,7 @@
             </div>
           </div>
 
+          <!-- SpiderHeck -->
           <div class="project-card">
             <h3 class="text-2xl font-bold mb-3">SpiderHeck</h3>
             <a href="https://www.youtube.com/watch?v=U8cnH1nNyrk" target="_blank" rel="noopener noreferrer">
@@ -601,6 +661,7 @@
             </div>
           </div>
 
+          <!-- Koh-Lanta -->
           <div class="project-card">
             <h3 class="text-2xl font-bold mb-3">Koh-Lanta</h3>
             <a href="https://www.youtube.com/watch?v=fA-loSXSd2c" target="_blank" rel="noopener noreferrer">
@@ -613,6 +674,7 @@
             </div>
           </div>
 
+          <!-- Tintin Reporter: Cigars of the Pharaoh -->
           <div class="project-card">
             <h3 class="text-2xl font-bold mb-3">Tintin Reporter: Cigars of the Pharaoh</h3>
             <a href="https://www.youtube.com/watch?v=5ZcMReTqZKw" target="_blank" rel="noopener noreferrer">
@@ -625,6 +687,7 @@
             </div>
           </div>
 
+          <!-- Arkanoid Eternal Battle -->
           <div class="project-card">
             <h3 class="text-2xl font-bold mb-3">Arkanoid Eternal Battle</h3>
             <a href="https://www.youtube.com/watch?v=MMuAe5zwTtE" target="_blank" rel="noopener noreferrer">
@@ -637,6 +700,7 @@
             </div>
           </div>
 
+          <!-- Marsupilami: Hoobadventure -->
           <div class="project-card">
             <h3 class="text-2xl font-bold mb-3">Marsupilami: Hoobadventure</h3>
             <a href="https://www.youtube.com/watch?v=w75lw9L0cAQ" target="_blank" rel="noopener noreferrer">
@@ -649,6 +713,7 @@
             </div>
           </div>
 
+          <!-- Operation Wolf Returns -->
           <div class="project-card">
             <h3 class="text-2xl font-bold mb-3">Operation Wolf Returns</h3>
             <a href="http://youtube.com/watch?v=vuYW8SGEVLg" target="_blank" rel="noopener noreferrer">
@@ -661,10 +726,11 @@
             </div>
           </div>
 
+          <!-- Kao the Kangaroo -->
           <div class="project-card">
             <h3 class="text-2xl font-bold mb-3">Kao the Kangaroo</h3>
             <a href="https://www.youtube.com/watch?v=Ld9FVoL_5XI" target="_blank" rel="noopener noreferrer">
-              <img src="https://images.wallpapersden.com/image/download/kao-the-kangaroo-2_bWhtaWeUmZqaraWkpJRnamtlrWZpaWU.jpg" alt="Kao the Kangaroo Thumbnail" />
+              <img src="https://i.ytimg.com/vi/m8Xd0y1cp_g/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLDyVlwed2OhbEc5jc-ZteMYzlX8kA" alt="Kao the Kangaroo Thumbnail" />
             </a>
             <p class="mb-2"><strong class="text-gray-900">Genre:</strong> Platformer / Adventure</p>
             <p class="project-description mb-4">Kao the Kangaroo is a 3D action platformer where players control Kao, a boxing kangaroo who embarks on a journey to find his missing sister and uncover the secret of his long-lost father. He must battle various "fighting masters" influenced by a dark power, ultimately facing the powerful Eternal Warrior.</p>
@@ -673,6 +739,7 @@
             </div>
           </div>
 
+          <!-- Smurf Village Party -->
           <div class="project-card">
             <h3 class="text-2xl font-bold mb-3">Smurf Village Party</h3>
             <a href="https://www.youtube.com/watch?v=c4gN0nRlVMU" target="_blank" rel="noopener noreferrer">
@@ -685,6 +752,7 @@
             </div>
           </div>
 
+          <!-- XIII (Thirteen) -->
           <div class="project-card">
             <h3 class="text-2xl font-bold mb-3">XIII (Thirteen)</h3>
             <a href="https://www.youtube.com/watch?v=z6NIMG2vNbU" target="_blank" rel="noopener noreferrer">
@@ -697,6 +765,7 @@
             </div>
           </div>
 
+          <!-- Syberia: The World Before -->
           <div class="project-card">
             <h3 class="text-2xl font-bold mb-3">Syberia: The World Before</h3>
             <a href="https://www.youtube.com/watch?v=L4CIrBygieg" target="_blank" rel="noopener noreferrer">
@@ -709,10 +778,11 @@
             </div>
           </div>
 
+          <!-- Alfred Hitchcock – Vertigo -->
           <div class="project-card">
             <h3 class="text-2xl font-bold mb-3">Alfred Hitchcock – Vertigo</h3>
             <a href="https://www.youtube.com/watch?v=fPKAk8ODh54" target="_blank" rel="noopener noreferrer">
-              <img src="https://fingerguns.net/wp-content/uploads/2022/09/IMG_3813-scaled.jpg" alt="Alfred Hitchcock – Vertigo Thumbnail" />
+              <img src="https://images.gog-statics.com/f0cd768a9f5103a6867f2b228a629e66da526067b826eefea753b0e98b7fb5e5.jpg" alt="Alfred Hitchcock – Vertigo Thumbnail" />
             </a>
             <p class="mb-2"><strong class="text-gray-900">Genre:</strong> Adventure / Mystery</p>
             <p class="project-description mb-4">This adventure game is loosely inspired by Alfred Hitchcock's film "Vertigo." It tells the story of Ed Miller, a writer who emerges unscathed from a car crash but insists his wife and daughter were with him, despite no one else being found. Traumatized and suffering from severe vertigo, he enters therapy to uncover what truly happened, blurring the lines between reality and fantasy.</p>
@@ -721,6 +791,7 @@
             </div>
           </div>
 
+          <!-- Agatha Christie – Murder on the Orient Express -->
           <div class="project-card">
             <h3 class="text-2xl font-bold mb-3">Agatha Christie – Murder on the Orient Express</h3>
             <a href="https://www.youtube.com/watch?v=9KpjBqnDvV4" target="_blank" rel="noopener noreferrer">
@@ -733,6 +804,7 @@
             </div>
           </div>
 
+          <!-- UFO Robot Grendizer -->
           <div class="project-card">
             <h3 class="text-2xl font-bold mb-3">UFO Robot Grendizer</h3>
             <a href="https://www.youtube.com/watch?v=au1zHSJ2uMA" target="_blank" rel="noopener noreferrer">
@@ -745,6 +817,7 @@
             </div>
           </div>
 
+          <!-- Asterix & Obelix: XXXL -->
           <div class="project-card">
             <h3 class="text-2xl font-bold mb-3">Asterix & Obelix: XXXL</h3>
             <a href="https://www.youtube.com/watch?v=95jwvslaySo" target="_blank" rel="noopener noreferrer">
@@ -757,6 +830,7 @@
             </div>
           </div>
 
+          <!-- Smurfs Kart -->
           <div class="project-card">
             <h3 class="text-2xl font-bold mb-3">Smurfs Kart</h3>
             <a href="https://www.youtube.com/watch?v=MDCCchiD8SE" target="_blank" rel="noopener noreferrer">
@@ -771,12 +845,15 @@
 
         </div>
 
+        <!-- Pagination Controls -->
         <div class="pagination-controls flex justify-center mt-12 space-x-6">
           <button id="prevBtn" class="px-8 py-3">Previous</button>
-          <span id="page-number-display"></span> <button id="nextBtn" class="px-8 py-3">Next</button>
+          <span id="page-number-display"></span> <!-- Added for page number display -->
+          <button id="nextBtn" class="px-8 py-3">Next</button>
         </div>
       </div>
 
+      <!-- New Skills & Technology Section -->
       <div class="section">
         <h2 id="skills">🛠️ Skills & Technology</h2>
         <ul class="skills-list">
@@ -800,6 +877,7 @@
         </ul>
       </div>
 
+      <!-- New Tools & Technology Section -->
       <div class="section">
         <h2 id="tools">🔧 Tools</h2>
         <ul class="tools-list">
@@ -816,6 +894,7 @@
         </ul>
       </div>
 
+      <!-- New Platforms Tested On Section -->
       <div class="section">
         <h2 id="platforms" class="platforms-header">Platforms Tested On</h2>
         <ul class="platforms-list">
@@ -826,6 +905,7 @@
         </ul>
       </div>
 
+      <!-- New combined section: Summary and Call to Action -->
       <div class="section">
         <h2 id="contact">🚀 Ready to Level Up Your Team?</h2>
         <p>With a proven track record in comprehensive game testing across multiple platforms and a deep understanding of the full STLC, I am confident in my ability to significantly contribute to the quality and success of your next gaming project. My blend of technical expertise, leadership experience, and passion for delivering flawless player experiences makes me an invaluable asset to any development team.</p>
@@ -837,11 +917,13 @@
         <p><strong>Instagram:</strong> ig_ak_</p>
       </div>
 
+      <!-- Footer -->
       <footer>
         <p>© 2025 Akshay Kurle. All rights reserved.</p>
       </footer>
     </div>
 
+    <!-- Handheld Console Sidebar (Index) -->
     <aside id="handheld-console-sidebar">
         <div class="console-screen">
             <ul>
@@ -1102,9 +1184,8 @@
       animateControllers();
       attachDpadListeners(); // Attach event listeners for D-pad
 
-      // Trigger the slide-in animation for the sidebar
+      // Trigger the slide-in animation for the sidebar on desktop
       const sidebar = document.getElementById('handheld-console-sidebar');
-      // Only apply slide-in if it's visible (i.e., on larger screens)
       if (window.innerWidth >= 1024) { // Matches the lg breakpoint in CSS
          sidebar.classList.add('slide-in');
       }
@@ -1118,6 +1199,8 @@
     // --- Handheld Console D-Pad and Menu Navigation ---
     function attachDpadListeners() {
         const menuLinks = document.querySelectorAll('#handheld-console-sidebar ul li a');
+        const sidebar = document.getElementById('handheld-console-sidebar');
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
         let currentSelectedIndex = -1; // -1 means no item is selected
 
         // Function to update the active class on menu items
@@ -1156,8 +1239,25 @@
                 if (targetSection) {
                     targetSection.scrollIntoView({ behavior: 'smooth' });
                 }
+
+                // If on mobile, close the sidebar after clicking a link
+                if (window.innerWidth < 1024) { // Check if it's a mobile viewport
+                    sidebar.classList.remove('mobile-open');
+                }
             });
         });
+
+        // Toggle sidebar visibility on mobile menu button click
+        if (mobileMenuButton) {
+            mobileMenuButton.addEventListener('click', () => {
+                playClickSound();
+                sidebar.classList.toggle('mobile-open');
+                // Ensure correct focus when opening the menu
+                if (sidebar.classList.contains('mobile-open') && currentSelectedIndex !== -1) {
+                    menuLinks[currentSelectedIndex].focus();
+                }
+            });
+        }
 
 
         document.querySelectorAll('.dpad-button').forEach(button => {
@@ -1194,10 +1294,12 @@
 
         // Add keyboard navigation for the menu (optional but good for accessibility)
         document.addEventListener('keydown', (event) => {
-            if (menuLinks.length === 0) return;
+            // Only act if focus is currently within the sidebar OR if the mobile menu is open
+            if ((document.activeElement && document.activeElement.closest('#handheld-console-sidebar')) ||
+                (window.innerWidth < 1024 && sidebar.classList.contains('mobile-open'))) {
 
-            if (document.activeElement && document.activeElement.closest('#handheld-console-sidebar')) {
-                // Only act if focus is currently within the sidebar
+                if (menuLinks.length === 0) return;
+
                 if (event.key === 'ArrowUp') {
                     event.preventDefault(); // Prevent page scrolling
                     playClickSound(); // Play sound on key press
@@ -1215,12 +1317,22 @@
                     if (aboutMeSection) {
                         aboutMeSection.scrollIntoView({ behavior: 'smooth' });
                     }
+                    // If on mobile and sidebar is open, close it on ArrowLeft (similar to clicking a link)
+                    if (window.innerWidth < 1024 && sidebar.classList.contains('mobile-open')) {
+                        sidebar.classList.remove('mobile-open');
+                    }
                 }
                  else if (event.key === 'Enter' || event.key === ' ') {
                     event.preventDefault(); // Prevent default button click behavior
                     playClickSound(); // Play sound on key press
                     if (currentSelectedIndex !== -1) {
                         menuLinks[currentSelectedIndex].click(); // Simulate click on active item
+                    }
+                } else if (event.key === 'Escape') { // Added Escape key to close the mobile menu
+                    if (window.innerWidth < 1024 && sidebar.classList.contains('mobile-open')) {
+                        playClickSound();
+                        sidebar.classList.remove('mobile-open');
+                        mobileMenuButton.focus(); // Return focus to the menu button
                     }
                 }
             }
